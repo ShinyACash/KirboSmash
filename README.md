@@ -1,6 +1,8 @@
 # KirboSmash
 A very simplified programming language written in python. (Only supports shell environment right now but will eventually have a scripting version. Interpreter based model)
 
+# How to Run Interpreter
+Open any code editor or python IDE and then run `shell.py`
 # Syntax
 
 The Syntax is based on kirby noises but mixed with english. 
