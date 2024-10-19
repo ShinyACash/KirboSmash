@@ -22,10 +22,8 @@ equals to : `==`
 # Variable Declaration
 
 `letyo <var_name> = <value>`
-
---Static Variable Declaration:
-
-This can be done by declaring a variable while performing an operation, for exmaple:
+<br /><br />
+A variable can be declared while performing an operation too, for exmaple:<br />
 <br />`poyo> 5 + letyo a = 6`
 <br />`11`
 <br /> `poyo> a`
