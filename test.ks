@@ -1,0 +1,33 @@
+power find_num{array, x}
+	letyo res = "Not Found"
+	foryo i = 0 po len{array} thenpo
+		ifyo array/i == x thenpo
+			letyo res = i
+		over
+	over
+	getpo res
+	#lmfao
+over
+
+say{"Hello User! \n this is KirboSmash! \n Let's perform a simple task shall we?"}
+say{"Enter a number: "}
+letyo a = tellme_int{}
+say{"Enter another number: "}
+letyo b = tellme_int{}
+letyo sum = a + b
+say{"Their sum is"}
+say{sum}
+
+#This is a comment and the interpreter should be ignoring this.
+
+
+
+
+letyo arr = [1,2,3,4,5]
+say{"This is an array: "}
+say{arr}
+say{"We'll be performing an operation on this array by finding the number you enter and returning its index with the function 'find_num{}'. If it doesnt exist then it'll return a string."}
+say{"Enter the number you want to search for: "}
+letyo n = tellme_int{}
+letyo ans = find_num{arr, n}
+say{ans}

@@ -6,6 +6,5 @@ while True:
 
     if error: 
         print(error.as_string())
-        ext = input("Poyoooo.... Press Any Key to Exit.")
-        break
+        ext = input("Poyoooo....")
     else: print(result)

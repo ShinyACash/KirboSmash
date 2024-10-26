@@ -1,4 +1,3 @@
-
 #######################################
 # IMPORTS
 #######################################
@@ -67,7 +66,7 @@ class RTError(Error):
       pos = ctx.parent_entry_pos
       ctx = ctx.parent
 
-    return 'POYO! wtf bruh an error Occured... Traceback (most recent meta knight call last @):\n' + result
+    return 'Traceback (most recent call last):\n' + result
 
 #######################################
 # POSITION
@@ -98,52 +97,50 @@ class Position:
 # TOKENS
 #######################################
 
-TT_INT			= 'INT'
+TT_INT				= 'INT'
 TT_FLOAT    	= 'FLOAT'
-TT_STRING		= 'STRING'
+TT_STRING			= 'STRING'
 TT_IDENTIFIER	= 'IDENTIFIER'
 TT_KEYWORD		= 'KEYWORD'
 TT_PLUS     	= 'PLUS'
 TT_MINUS    	= 'MINUS'
 TT_MUL      	= 'MUL'
 TT_DIV      	= 'DIV'
-TT_POW			= 'POW'
-TT_EQ			= 'EQ'
+TT_POW				= 'POW'
+TT_EQ					= 'EQ'
 TT_LPAREN   	= 'LPAREN'
 TT_RPAREN   	= 'RPAREN'
-TT_LBPAREN   	= 'LBPAREN'
-TT_RBPAREN   	= 'RBPAREN'
-TT_LSQUARE      = 'LSQUARE'
-TT_RSQUARE      = 'RSQUARE'
-TT_EE			= 'EE'
-TT_NE			= 'NE'
-TT_LT			= 'LT'
-TT_GT			= 'GT'
-TT_LTE		    = 'LTE'
-TT_GTE			= 'GTE'
-TT_COMMA		= 'COMMA'
-TT_ARROW		= 'ARROW'
+TT_LSQUARE    = 'LSQUARE'
+TT_RSQUARE    = 'RSQUARE'
+TT_EE					= 'EE'
+TT_NE					= 'NE'
+TT_LT					= 'LT'
+TT_GT					= 'GT'
+TT_LTE				= 'LTE'
+TT_GTE				= 'GTE'
+TT_COMMA			= 'COMMA'
+TT_ARROW			= 'ARROW'
 TT_NEWLINE		= 'NEWLINE'
-TT_EOF			= 'EOF'
+TT_EOF				= 'EOF'
 
 KEYWORDS = [
-  'letyo',
-  'andpo',
-  'orpo',
-  'nopo',
-  'ifyo',
-  'butpoyo',
-  'elseyo',
-  'foryo',
-  'po',
-  'stepo',
-  'whileyo',
-  'power',
-  'thenpo',
-  'over',
-  'getpo',
-  'cmon',
-  'die',
+  'VAR',
+  'AND',
+  'OR',
+  'NOT',
+  'IF',
+  'ELIF',
+  'ELSE',
+  'FOR',
+  'TO',
+  'STEP',
+  'WHILE',
+  'FUN',
+  'THEN',
+  'END',
+  'RETURN',
+  'CONTINUE',
+  'BREAK',
 ]
 
 class Token:
@@ -224,12 +221,6 @@ class Lexer:
         self.advance()
       elif self.current_char == ']':
         tokens.append(Token(TT_RSQUARE, pos_start=self.pos))
-        self.advance()
-      elif self.current_char == '{':
-        tokens.append(Token(TT_LBPAREN, pos_start=self.pos))
-        self.advance()
-      elif self.current_char == '}':
-        tokens.append(Token(TT_RBPAREN, pos_start=self.pos))
         self.advance()
       elif self.current_char == '!':
         token, error = self.make_not_equals()
@@ -581,7 +572,7 @@ class Parser:
         "Token cannot appear after previous tokens"
       ))
     return res
-#Debug pls
+
   ###################################
 
   def statements(self):
@@ -626,7 +617,7 @@ class Parser:
     res = ParseResult()
     pos_start = self.current_tok.pos_start.copy()
 
-    if self.current_tok.matches(TT_KEYWORD, 'getpo'):
+    if self.current_tok.matches(TT_KEYWORD, 'RETURN'):
       res.register_advancement()
       self.advance()
 
@@ -635,12 +626,12 @@ class Parser:
         self.reverse(res.to_reverse_count)
       return res.success(ReturnNode(expr, pos_start, self.current_tok.pos_start.copy()))
     
-    if self.current_tok.matches(TT_KEYWORD, 'cmon'):
+    if self.current_tok.matches(TT_KEYWORD, 'CONTINUE'):
       res.register_advancement()
       self.advance()
       return res.success(ContinueNode(pos_start, self.current_tok.pos_start.copy()))
       
-    if self.current_tok.matches(TT_KEYWORD, 'die'):
+    if self.current_tok.matches(TT_KEYWORD, 'BREAK'):
       res.register_advancement()
       self.advance()
       return res.success(BreakNode(pos_start, self.current_tok.pos_start.copy()))
@@ -649,14 +640,14 @@ class Parser:
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expected 'getpo', 'cmon', 'die', 'letyo', 'ifyo', 'foryo', 'whileyo', 'power', int, float, identifier, '+', '-', '(', '[' or 'nopo'"
+        "Expected 'RETURN', 'CONTINUE', 'BREAK', 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
       ))
     return res.success(expr)
 
   def expr(self):
     res = ParseResult()
 
-    if self.current_tok.matches(TT_KEYWORD, 'letyo'):
+    if self.current_tok.matches(TT_KEYWORD, 'VAR'):
       res.register_advancement()
       self.advance()
 
@@ -682,12 +673,12 @@ class Parser:
       if res.error: return res
       return res.success(VarAssignNode(var_name, expr))
 
-    node = res.register(self.bin_op(self.comp_expr, ((TT_KEYWORD, 'andpo'), (TT_KEYWORD, 'orpo'))))
+    node = res.register(self.bin_op(self.comp_expr, ((TT_KEYWORD, 'AND'), (TT_KEYWORD, 'OR'))))
 
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expected 'letyo', 'ifyo', 'foryo', 'whileyo', 'power', int, float, identifier, '+', '-', '(', '[' or 'nopo'"
+        "Expected 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
       ))
 
     return res.success(node)
@@ -695,7 +686,7 @@ class Parser:
   def comp_expr(self):
     res = ParseResult()
 
-    if self.current_tok.matches(TT_KEYWORD, 'nopo'):
+    if self.current_tok.matches(TT_KEYWORD, 'NOT'):
       op_tok = self.current_tok
       res.register_advancement()
       self.advance()
@@ -709,7 +700,7 @@ class Parser:
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expected int, float, identifier, '+', '-', '(', '[', 'ifyo', 'foryo', 'whileyo', 'power' or 'nopo'"
+        "Expected int, float, identifier, '+', '-', '(', '[', 'IF', 'FOR', 'WHILE', 'FUN' or 'NOT'"
       ))
 
     return res.success(node)
@@ -741,12 +732,12 @@ class Parser:
     atom = res.register(self.atom())
     if res.error: return res
 
-    if self.current_tok.type == TT_LBPAREN:
+    if self.current_tok.type == TT_LPAREN:
       res.register_advancement()
       self.advance()
       arg_nodes = []
 
-      if self.current_tok.type == TT_RBPAREN:
+      if self.current_tok.type == TT_RPAREN:
         res.register_advancement()
         self.advance()
       else:
@@ -754,7 +745,7 @@ class Parser:
         if res.error:
           return res.failure(InvalidSyntaxError(
             self.current_tok.pos_start, self.current_tok.pos_end,
-            "Expected '}', 'letyo', 'ifyo', 'foryo', 'whileyo', 'power', int, float, identifier, '+', '-', '(', '[', '{' or 'nopo'"
+            "Expected ')', 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
           ))
 
         while self.current_tok.type == TT_COMMA:
@@ -764,10 +755,10 @@ class Parser:
           arg_nodes.append(res.register(self.expr()))
           if res.error: return res
 
-        if self.current_tok.type != TT_RBPAREN:
+        if self.current_tok.type != TT_RPAREN:
           return res.failure(InvalidSyntaxError(
             self.current_tok.pos_start, self.current_tok.pos_end,
-            f"Expected ',' or curly bracket"
+            f"Expected ',' or ')'"
           ))
 
         res.register_advancement()
@@ -814,29 +805,29 @@ class Parser:
       if res.error: return res
       return res.success(list_expr)
     
-    elif tok.matches(TT_KEYWORD, 'ifyo'):
+    elif tok.matches(TT_KEYWORD, 'IF'):
       if_expr = res.register(self.if_expr())
       if res.error: return res
       return res.success(if_expr)
 
-    elif tok.matches(TT_KEYWORD, 'foryo'):
+    elif tok.matches(TT_KEYWORD, 'FOR'):
       for_expr = res.register(self.for_expr())
       if res.error: return res
       return res.success(for_expr)
 
-    elif tok.matches(TT_KEYWORD, 'whileyo'):
+    elif tok.matches(TT_KEYWORD, 'WHILE'):
       while_expr = res.register(self.while_expr())
       if res.error: return res
       return res.success(while_expr)
 
-    elif tok.matches(TT_KEYWORD, 'power'):
+    elif tok.matches(TT_KEYWORD, 'FUN'):
       func_def = res.register(self.func_def())
       if res.error: return res
       return res.success(func_def)
 
     return res.failure(InvalidSyntaxError(
       tok.pos_start, tok.pos_end,
-      "Expected int, float, identifier, '+', '-', '(', '[', ifyo', 'foryo', 'whileyo', 'power'"
+      "Expected int, float, identifier, '+', '-', '(', '[', IF', 'FOR', 'WHILE', 'FUN'"
     ))
 
   def list_expr(self):
@@ -861,7 +852,7 @@ class Parser:
       if res.error:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          "Expected ']', 'letyo', 'ifyo', 'foryo', 'whileyo', 'power', int, float, identifier, '+', '-', '(', '[' or 'nopo'"
+          "Expected ']', 'VAR', 'IF', 'FOR', 'WHILE', 'FUN', int, float, identifier, '+', '-', '(', '[' or 'NOT'"
         ))
 
       while self.current_tok.type == TT_COMMA:
@@ -888,19 +879,19 @@ class Parser:
 
   def if_expr(self):
     res = ParseResult()
-    all_cases = res.register(self.if_expr_cases('ifyo'))
+    all_cases = res.register(self.if_expr_cases('IF'))
     if res.error: return res
     cases, else_case = all_cases
     return res.success(IfNode(cases, else_case))
 
   def if_expr_b(self):
-    return self.if_expr_cases('butpoyo')
+    return self.if_expr_cases('ELIF')
     
   def if_expr_c(self):
     res = ParseResult()
     else_case = None
 
-    if self.current_tok.matches(TT_KEYWORD, 'elseyo'):
+    if self.current_tok.matches(TT_KEYWORD, 'ELSE'):
       res.register_advancement()
       self.advance()
 
@@ -912,13 +903,13 @@ class Parser:
         if res.error: return res
         else_case = (statements, True)
 
-        if self.current_tok.matches(TT_KEYWORD, 'over'):
+        if self.current_tok.matches(TT_KEYWORD, 'END'):
           res.register_advancement()
           self.advance()
         else:
           return res.failure(InvalidSyntaxError(
             self.current_tok.pos_start, self.current_tok.pos_end,
-            "Expected 'over'"
+            "Expected 'END'"
           ))
       else:
         expr = res.register(self.statement())
@@ -931,7 +922,7 @@ class Parser:
     res = ParseResult()
     cases, else_case = [], None
 
-    if self.current_tok.matches(TT_KEYWORD, 'butpoyo'):
+    if self.current_tok.matches(TT_KEYWORD, 'ELIF'):
       all_cases = res.register(self.if_expr_b())
       if res.error: return res
       cases, else_case = all_cases
@@ -958,10 +949,10 @@ class Parser:
     condition = res.register(self.expr())
     if res.error: return res
 
-    if not self.current_tok.matches(TT_KEYWORD, 'thenpo'):
+    if not self.current_tok.matches(TT_KEYWORD, 'THEN'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'thenpo'"
+        f"Expected 'THEN'"
       ))
 
     res.register_advancement()
@@ -975,7 +966,7 @@ class Parser:
       if res.error: return res
       cases.append((condition, statements, True))
 
-      if self.current_tok.matches(TT_KEYWORD, 'over'):
+      if self.current_tok.matches(TT_KEYWORD, 'END'):
         res.register_advancement()
         self.advance()
       else:
@@ -998,10 +989,10 @@ class Parser:
   def for_expr(self):
     res = ParseResult()
 
-    if not self.current_tok.matches(TT_KEYWORD, 'foryo'):
+    if not self.current_tok.matches(TT_KEYWORD, 'FOR'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'foryo'"
+        f"Expected 'FOR'"
       ))
 
     res.register_advancement()
@@ -1029,10 +1020,10 @@ class Parser:
     start_value = res.register(self.expr())
     if res.error: return res
 
-    if not self.current_tok.matches(TT_KEYWORD, 'po'):
+    if not self.current_tok.matches(TT_KEYWORD, 'TO'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'po'"
+        f"Expected 'TO'"
       ))
     
     res.register_advancement()
@@ -1041,7 +1032,7 @@ class Parser:
     end_value = res.register(self.expr())
     if res.error: return res
 
-    if self.current_tok.matches(TT_KEYWORD, 'stepo'):
+    if self.current_tok.matches(TT_KEYWORD, 'STEP'):
       res.register_advancement()
       self.advance()
 
@@ -1050,10 +1041,10 @@ class Parser:
     else:
       step_value = None
 
-    if not self.current_tok.matches(TT_KEYWORD, 'thenpo'):
+    if not self.current_tok.matches(TT_KEYWORD, 'THEN'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'thenpo'"
+        f"Expected 'THEN'"
       ))
 
     res.register_advancement()
@@ -1066,10 +1057,10 @@ class Parser:
       body = res.register(self.statements())
       if res.error: return res
 
-      if not self.current_tok.matches(TT_KEYWORD, 'over'):
+      if not self.current_tok.matches(TT_KEYWORD, 'END'):
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          f"Expected 'over'"
+          f"Expected 'END'"
         ))
 
       res.register_advancement()
@@ -1085,10 +1076,10 @@ class Parser:
   def while_expr(self):
     res = ParseResult()
 
-    if not self.current_tok.matches(TT_KEYWORD, 'whileyo'):
+    if not self.current_tok.matches(TT_KEYWORD, 'WHILE'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'whileyo'"
+        f"Expected 'WHILE'"
       ))
 
     res.register_advancement()
@@ -1097,10 +1088,10 @@ class Parser:
     condition = res.register(self.expr())
     if res.error: return res
 
-    if not self.current_tok.matches(TT_KEYWORD, 'thenpo'):
+    if not self.current_tok.matches(TT_KEYWORD, 'THEN'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'thenpo'"
+        f"Expected 'THEN'"
       ))
 
     res.register_advancement()
@@ -1113,10 +1104,10 @@ class Parser:
       body = res.register(self.statements())
       if res.error: return res
 
-      if not self.current_tok.matches(TT_KEYWORD, 'over'):
+      if not self.current_tok.matches(TT_KEYWORD, 'END'):
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          f"Expected 'over'"
+          f"Expected 'END'"
         ))
 
       res.register_advancement()
@@ -1132,10 +1123,10 @@ class Parser:
   def func_def(self):
     res = ParseResult()
 
-    if not self.current_tok.matches(TT_KEYWORD, 'power'):
+    if not self.current_tok.matches(TT_KEYWORD, 'FUN'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'power'"
+        f"Expected 'FUN'"
       ))
 
     res.register_advancement()
@@ -1145,17 +1136,17 @@ class Parser:
       var_name_tok = self.current_tok
       res.register_advancement()
       self.advance()
-      if self.current_tok.type != TT_LBPAREN:
+      if self.current_tok.type != TT_LPAREN:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          f"Expected curly bracket"
+          f"Expected '('"
         ))
     else:
       var_name_tok = None
-      if self.current_tok.type != TT_LBPAREN:
+      if self.current_tok.type != TT_LPAREN:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          f"Expected identifier or curly bracket"
+          f"Expected identifier or '('"
         ))
     
     res.register_advancement()
@@ -1181,13 +1172,13 @@ class Parser:
         res.register_advancement()
         self.advance()
       
-      if self.current_tok.type != TT_RBPAREN:
+      if self.current_tok.type != TT_RPAREN:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
           f"Expected ',' or ')'"
         ))
     else:
-      if self.current_tok.type != TT_RBPAREN:
+      if self.current_tok.type != TT_RPAREN:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
           f"Expected identifier or ')'"
@@ -1213,7 +1204,7 @@ class Parser:
     if self.current_tok.type != TT_NEWLINE:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"BRO BE CAREFUL! Expected '->' or NEWLINE"
+        f"Expected '->' or NEWLINE"
       ))
 
     res.register_advancement()
@@ -1222,10 +1213,10 @@ class Parser:
     body = res.register(self.statements())
     if res.error: return res
 
-    if not self.current_tok.matches(TT_KEYWORD, 'over'):
+    if not self.current_tok.matches(TT_KEYWORD, 'END'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expected 'over'"
+        f"Expected 'END'"
       ))
 
     res.register_advancement()
@@ -1306,7 +1297,7 @@ class RTResult:
     return self
 
   def should_return(self):
-    #will allow user to continue and break outside the current function
+    # Note: this will allow you to continue and break outside the current function
     return (
       self.error or
       self.func_return_value or
@@ -1387,7 +1378,7 @@ class Value:
     if not other: other = self
     return RTError(
       self.pos_start, other.pos_end,
-      'POYO! Illegal operation dude, you can do better.',
+      'Illegal operation',
       self.context
     )
 
@@ -1419,7 +1410,7 @@ class Number(Value):
       if other.value == 0:
         return None, RTError(
           other.pos_start, other.pos_end,
-          'You failure, division by zero??? LITTLE TIMMY CAN DO BETTER!',
+          'Division by zero',
           self.context
         )
 
@@ -1555,7 +1546,7 @@ class List(Value):
       except:
         return None, RTError(
           other.pos_start, other.pos_end,
-          'POYO! Element at this index could not be removed from list because index is out of bounds bruh. Get your indices right.',
+          'Element at this index could not be removed from list because index is out of bounds',
           self.context
         )
     else:
@@ -1576,7 +1567,7 @@ class List(Value):
       except:
         return None, RTError(
           other.pos_start, other.pos_end,
-          'POYO! Element at this index could not be retrieved from list because index is out of bounds bruh. Get your indices right.',
+          'Element at this index could not be retrieved from list because index is out of bounds',
           self.context
         )
     else:
@@ -1610,14 +1601,14 @@ class BaseFunction(Value):
     if len(args) > len(arg_names):
       return res.failure(RTError(
         self.pos_start, self.pos_end,
-        f"{len(args) - len(arg_names)} too many args passed into {self}, poyoooo :(",
+        f"{len(args) - len(arg_names)} too many args passed into {self}",
         self.context
       ))
     
     if len(args) < len(arg_names):
       return res.failure(RTError(
         self.pos_start, self.pos_end,
-        f"{len(arg_names) - len(args)} too few args passed into {self}, poyooo :(",
+        f"{len(arg_names) - len(args)} too few args passed into {self}",
         self.context
       ))
 
@@ -1665,7 +1656,7 @@ class Function(BaseFunction):
     return copy
 
   def __repr__(self):
-    return f"<function {self.name}> created, poyo!"
+    return f"<function {self.name}>"
 
 class BuiltInFunction(BaseFunction):
   def __init__(self, name):
@@ -1686,7 +1677,7 @@ class BuiltInFunction(BaseFunction):
     return res.success(return_value)
   
   def no_visit_method(self, node, context):
-    raise Exception(f'No execute_{self.name} method defined bruh. Fix it.')
+    raise Exception(f'No execute_{self.name} method defined')
 
   def copy(self):
     copy = BuiltInFunction(self.name)
@@ -1787,7 +1778,7 @@ class BuiltInFunction(BaseFunction):
     except:
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        'Element at this index could not be removed from list because index is out of bounds bruh. Get your indices right.',
+        'Element at this index could not be removed from list because index is out of bounds',
         exec_ctx
       ))
     return RTResult().success(element)
@@ -1800,14 +1791,14 @@ class BuiltInFunction(BaseFunction):
     if not isinstance(listA, List):
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        "POYO! First argument must be list!!",
+        "First argument must be list",
         exec_ctx
       ))
 
     if not isinstance(listB, List):
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        "Second argument must be list too bruh.",
+        "Second argument must be list",
         exec_ctx
       ))
 
@@ -1821,7 +1812,7 @@ class BuiltInFunction(BaseFunction):
     if not isinstance(list_, List):
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        "Argument must be list bruh. Lacking fr.",
+        "Argument must be list",
         exec_ctx
       ))
 
@@ -1834,7 +1825,7 @@ class BuiltInFunction(BaseFunction):
     if not isinstance(fn, String):
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        "Second argument must be string too bruh",
+        "Second argument must be string",
         exec_ctx
       ))
 
@@ -1846,7 +1837,7 @@ class BuiltInFunction(BaseFunction):
     except Exception as e:
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        f"POYO! Oopsies, Failed to load script \"{fn}\"\n" + str(e),
+        f"Failed to load script \"{fn}\"\n" + str(e),
         exec_ctx
       ))
 
@@ -1855,7 +1846,7 @@ class BuiltInFunction(BaseFunction):
     if error:
       return RTResult().failure(RTError(
         self.pos_start, self.pos_end,
-        f"POYO! Failed to finish executing script \"{fn}\" sadly. You are the mistake here not the interpreter. \n" +
+        f"Failed to finish executing script \"{fn}\"\n" +
         error.as_string(),
         exec_ctx
       ))
@@ -1875,8 +1866,8 @@ BuiltInFunction.is_function = BuiltInFunction("is_function")
 BuiltInFunction.append      = BuiltInFunction("append")
 BuiltInFunction.pop         = BuiltInFunction("pop")
 BuiltInFunction.extend      = BuiltInFunction("extend")
-BuiltInFunction.len			= BuiltInFunction("len")
-BuiltInFunction.run			= BuiltInFunction("run")
+BuiltInFunction.len					= BuiltInFunction("len")
+BuiltInFunction.run					= BuiltInFunction("run")
 
 #######################################
 # CONTEXT
@@ -2000,9 +1991,9 @@ class Interpreter:
       result, error = left.get_comparison_lte(right)
     elif node.op_tok.type == TT_GTE:
       result, error = left.get_comparison_gte(right)
-    elif node.op_tok.matches(TT_KEYWORD, 'andpo'):
+    elif node.op_tok.matches(TT_KEYWORD, 'AND'):
       result, error = left.anded_by(right)
-    elif node.op_tok.matches(TT_KEYWORD, 'orpo'):
+    elif node.op_tok.matches(TT_KEYWORD, 'OR'):
       result, error = left.ored_by(right)
 
     if error:
@@ -2019,7 +2010,7 @@ class Interpreter:
 
     if node.op_tok.type == TT_MINUS:
       number, error = number.multed_by(Number(-1))
-    elif node.op_tok.matches(TT_KEYWORD, 'nopo'):
+    elif node.op_tok.matches(TT_KEYWORD, 'NOT'):
       number, error = number.notted()
 
     if error:
@@ -2169,25 +2160,25 @@ class Interpreter:
 #######################################
 
 global_symbol_table = SymbolTable()
-global_symbol_table.set("null", Number.null)
-global_symbol_table.set("false", Number.false)
-global_symbol_table.set("true", Number.true)
-global_symbol_table.set("math_pi", Number.math_PI)
-global_symbol_table.set("say", BuiltInFunction.print)
-global_symbol_table.set("say_ret", BuiltInFunction.print_ret)
-global_symbol_table.set("tellme", BuiltInFunction.input)
-global_symbol_table.set("tellme_int", BuiltInFunction.input_int)
-global_symbol_table.set("boom", BuiltInFunction.clear)
-global_symbol_table.set("booms", BuiltInFunction.clear)
-global_symbol_table.set("is_numpo", BuiltInFunction.is_number)
-global_symbol_table.set("is_stringpo", BuiltInFunction.is_string)
-global_symbol_table.set("is_listpo", BuiltInFunction.is_list)
-global_symbol_table.set("is_power", BuiltInFunction.is_function)
-global_symbol_table.set("join", BuiltInFunction.append)
-global_symbol_table.set("explode", BuiltInFunction.pop)
-global_symbol_table.set("stretch", BuiltInFunction.extend)
-global_symbol_table.set("len", BuiltInFunction.len)
-global_symbol_table.set("go", BuiltInFunction.run)
+global_symbol_table.set("NULL", Number.null)
+global_symbol_table.set("FALSE", Number.false)
+global_symbol_table.set("TRUE", Number.true)
+global_symbol_table.set("MATH_PI", Number.math_PI)
+global_symbol_table.set("PRINT", BuiltInFunction.print)
+global_symbol_table.set("PRINT_RET", BuiltInFunction.print_ret)
+global_symbol_table.set("INPUT", BuiltInFunction.input)
+global_symbol_table.set("INPUT_INT", BuiltInFunction.input_int)
+global_symbol_table.set("CLEAR", BuiltInFunction.clear)
+global_symbol_table.set("CLS", BuiltInFunction.clear)
+global_symbol_table.set("IS_NUM", BuiltInFunction.is_number)
+global_symbol_table.set("IS_STR", BuiltInFunction.is_string)
+global_symbol_table.set("IS_LIST", BuiltInFunction.is_list)
+global_symbol_table.set("IS_FUN", BuiltInFunction.is_function)
+global_symbol_table.set("APPEND", BuiltInFunction.append)
+global_symbol_table.set("POP", BuiltInFunction.pop)
+global_symbol_table.set("EXTEND", BuiltInFunction.extend)
+global_symbol_table.set("LEN", BuiltInFunction.len)
+global_symbol_table.set("RUN", BuiltInFunction.run)
 
 def run(fn, text):
   # Generate tokens
