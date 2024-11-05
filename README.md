@@ -1,6 +1,7 @@
 # KirboSmash
 A very simplified programming language written in python.
 Now supports Shell and Scripting both!! POYO!! (Interpreter based model)
+This list has to be updated, there's extra stuff i need to write.
 
 # How to Run Interpreter
 Open any code editor or python IDE and then run `shell.py`
