@@ -85,3 +85,5 @@ keywords: `ifyo`, `thenpo`, `elseyo`
 &emsp; `<your_code>` <br />
 `over`
 
+# The list is still under progress (sorry hehe)
+
