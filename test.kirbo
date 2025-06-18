@@ -9,7 +9,7 @@ power find_num{array, x}
 	#lmfao
 over
 
-say{"Hello User! \n this is KirboSmash! \n Let's perform a simple task shall we?"}
+say{"Hello User! This is KirboSmash! Let's perform a simple task shall we?"}
 say{"Enter a number: "}
 letyo a = tellme_int{}
 say{"Enter another number: "}
@@ -19,9 +19,6 @@ say{"Their sum is"}
 say{sum}
 
 #This is a comment and the interpreter should be ignoring this.
-
-
-
 
 letyo arr = [1,2,3,4,5]
 say{"This is an array: "}
